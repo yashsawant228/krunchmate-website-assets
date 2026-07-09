@@ -51,9 +51,6 @@ export default function Contact() {
                   </div>
                 </div>
               </div>
-              <p className="text-cream/40 text-xs">
-                [PLACEHOLDER — confirm KrunchMate team's live contact address.]
-              </p>
             </div>
           </div>
 

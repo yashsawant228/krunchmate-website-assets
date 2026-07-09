@@ -11,25 +11,35 @@ export function CartProvider({ children }) {
   const closeCart = useCallback(() => setOpen(false), []);
   const toggleCart = useCallback(() => setOpen((o) => !o), []);
 
-  const addItem = useCallback((id, qty = 1) => {
+  const addItem = useCallback((id, qty = 1, unitPrice) => {
     setItems((prev) => {
-      const existing = prev.find((p) => p.id === id);
+      const existing = prev.find(
+        (p) => p.id === id && (p.unitPrice ?? null) === (unitPrice ?? null)
+      );
       if (existing) {
-        return prev.map((p) => (p.id === id ? { ...p, qty: p.qty + qty } : p));
+        return prev.map((p) =>
+          p === existing ? { ...p, qty: p.qty + qty } : p
+        );
       }
-      return [...prev, { id, qty }];
+      return [...prev, { id, qty, unitPrice }];
     });
     setOpen(true);
   }, []);
 
-  const removeItem = useCallback((id) => {
-    setItems((prev) => prev.filter((p) => p.id !== id));
+  const removeItem = useCallback((id, unitPrice) => {
+    setItems((prev) =>
+      prev.filter((p) => !(p.id === id && (p.unitPrice ?? null) === (unitPrice ?? null)))
+    );
   }, []);
 
-  const updateQty = useCallback((id, qty) => {
+  const updateQty = useCallback((id, qty, unitPrice) => {
     setItems((prev) =>
       prev
-        .map((p) => (p.id === id ? { ...p, qty: Math.max(0, qty) } : p))
+        .map((p) =>
+          p.id === id && (p.unitPrice ?? null) === (unitPrice ?? null)
+            ? { ...p, qty: Math.max(0, qty) }
+            : p
+        )
         .filter((p) => p.qty > 0)
     );
   }, []);
@@ -38,11 +48,16 @@ export function CartProvider({ children }) {
 
   const detailed = useMemo(
     () =>
-      items.map((it) => ({
-        ...it,
-        flavour: FLAVOURS[it.id],
-        lineTotal: (FLAVOURS[it.id]?.price || 0) * it.qty,
-      })),
+      items.map((it) => {
+        const flavour = FLAVOURS[it.id];
+        const unit = it.unitPrice ?? flavour?.price ?? 0;
+        return {
+          ...it,
+          flavour,
+          unit,
+          lineTotal: unit * it.qty,
+        };
+      }),
     [items]
   );
 

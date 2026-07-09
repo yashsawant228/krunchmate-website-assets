@@ -122,7 +122,10 @@ function ShopCard({ flavour }) {
           </div>
 
           <button
-            onClick={() => addItem(flavour.id, totalPouches)}
+            onClick={() => {
+              const effectiveUnit = +(flavour.price * unitDiscount).toFixed(2);
+              addItem(flavour.id, totalPouches, effectiveUnit);
+            }}
             className="mt-6 btn-gold self-start"
             data-testid={`shop-add-${flavour.id}`}
           >
@@ -170,10 +173,6 @@ export default function Shop() {
             <ShopCard key={f.id} flavour={f} />
           ))}
         </div>
-
-        <p className="mt-16 text-cream/40 text-xs">
-          [PLACEHOLDER — additional pouch angles needed for full 360° rotation]
-        </p>
       </div>
     </div>
   );

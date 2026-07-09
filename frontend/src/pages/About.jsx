@@ -123,7 +123,7 @@ export default function About() {
           </div>
 
           <p className="mt-8 text-cream/40 text-xs">
-            [PLACEHOLDER — confirm with KrunchMate team: founder names, exact launch dates.]
+            Founder story continues — check back for our next chapter.
           </p>
         </div>
       </div>

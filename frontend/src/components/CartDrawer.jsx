@@ -144,7 +144,7 @@ export default function CartDrawer() {
                             </div>
                           </div>
                           <button
-                            onClick={() => removeItem(it.id)}
+                            onClick={() => removeItem(it.id, it.unitPrice)}
                             className="text-cream/60 hover:text-gold text-xs uppercase tracking-widest"
                             data-testid={`cart-remove-${it.id}`}
                           >
@@ -154,7 +154,7 @@ export default function CartDrawer() {
                         <div className="flex items-center justify-between mt-3">
                           <div className="flex items-center gap-2 border border-white/20 rounded-full">
                             <button
-                              onClick={() => updateQty(it.id, it.qty - 1)}
+                              onClick={() => updateQty(it.id, it.qty - 1, it.unitPrice)}
                               className="w-7 h-7 flex items-center justify-center text-cream hover:text-gold"
                               data-testid={`cart-decr-${it.id}`}
                             >
@@ -162,7 +162,7 @@ export default function CartDrawer() {
                             </button>
                             <span className="text-cream min-w-[18px] text-center text-sm">{it.qty}</span>
                             <button
-                              onClick={() => updateQty(it.id, it.qty + 1)}
+                              onClick={() => updateQty(it.id, it.qty + 1, it.unitPrice)}
                               className="w-7 h-7 flex items-center justify-center text-cream hover:text-gold"
                               data-testid={`cart-incr-${it.id}`}
                             >
