@@ -57,8 +57,8 @@ export default function Reviews() {
               data-testid={`review-${idx}`}
             >
               <div className="flex items-center gap-1 mb-6">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} size={16} fill="#F6A81E" stroke="#F6A81E" />
+                {["s1", "s2", "s3", "s4", "s5"].map((k) => (
+                  <Star key={k} size={16} fill="#F6A81E" stroke="#F6A81E" />
                 ))}
               </div>
               <p className="font-display text-2xl lg:text-4xl text-cream leading-tight">
@@ -78,9 +78,9 @@ export default function Reviews() {
         </div>
 
         <div className="flex items-center gap-1 mt-8">
-          {REVIEWS.map((_, i) => (
+          {REVIEWS.map((r, i) => (
             <button
-              key={i}
+              key={r.author}
               onClick={() => setIdx(i)}
               className={`h-[3px] rounded-full transition-all ${
                 i === idx ? "w-10 bg-[color:var(--gold)]" : "w-5 bg-cream/25"

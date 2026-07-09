@@ -18,8 +18,8 @@ export default function PouchViewer({ flavour, autoRotate = true, size = "lg" })
   const [dragging, setDragging] = useState(false);
   const [hover, setHover] = useState(false);
 
-  const width = size === "sm" ? 200 : size === "md" ? 320 : 440;
-  const height = size === "sm" ? 280 : size === "md" ? 440 : 620;
+  const SIZES = { sm: { w: 200, h: 280 }, md: { w: 320, h: 440 }, lg: { w: 440, h: 620 } };
+  const { w: width, h: height } = SIZES[size] || SIZES.lg;
 
   // Subtle idle sway (±10°) when idle and not dragging — avoids the pouch
   // ever going edge-on (which would hide it due to backface-visibility).

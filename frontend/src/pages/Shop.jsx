@@ -19,7 +19,8 @@ function ShopCard({ flavour }) {
   const [qty, setQty] = useState(1);
 
   const pack = PACK_OPTIONS[packIdx];
-  const unitDiscount = pack.qty === 3 ? 0.95 : pack.qty === 6 ? 0.9 : 1;
+  const DISCOUNTS = { 3: 0.95, 6: 0.9 };
+  const unitDiscount = DISCOUNTS[pack.qty] ?? 1;
   const totalPouches = pack.qty * qty;
   const lineTotal = flavour.price * totalPouches * unitDiscount;
 
