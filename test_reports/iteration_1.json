@@ -1,0 +1,57 @@
+{
+  "summary": "First-run E2E testing of KrunchMate DTC landing page. Backend (/api/health, /api/subscribe) fully working; frontend flows (hero palette switch, cart drawer + fill widget, bundles, shop packs, contact form, FAQ, footer newsletter, mobile sticky bar, self-hosted fonts, British English) all pass. One functional discrepancy identified: Shop page displays discounted prices for 3× and 6× packs but the cart does not actually apply the discount (it charges full unit price × qty).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Shop/ShopCard",
+        "issue": "Multi-pack discount (5% for 3×, 10% for 6×) is displayed in the price label on the Shop page (£10.69 shown for 3×) but the cart adds the full unit price × qty (£11.25). The discount is decorative-only — customers see one price, cart charges another. addItem(flavour.id, totalPouches) needs to pass a discounted unit price OR the cart line must accept a lineTotal override.",
+        "selector": "[data-testid=\"shop-add-salt-vinegar\"] / [data-testid=\"cart-subtotal\"]",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Contact page",
+        "issues": ["'[PLACEHOLDER — confirm KrunchMate team's live contact address.]' text is visible in production copy — this internal note should be removed or hidden before ship."]
+      },
+      {
+        "screen": "Shop page",
+        "issues": ["'[PLACEHOLDER — additional pouch angles needed for full 360° rotation]' internal note is visible at the bottom of the Shop grid."]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_krunchmate_api.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix Shop multi-pack pricing: cart must honour the displayed discounted price for 3× (5% off) and 6× (10% off) packs. Either compute the effective unit price and add multiple line entries, or extend CartContext to accept a per-line unit price override.",
+    "Remove or gate behind an env flag the two visible '[PLACEHOLDER — …]' notes on /shop and /contact before production."
+  ],
+  "critical_code_review_comments": [
+    "CartContext stores only {id, qty} → cannot represent bundle-discounted units. The Shop page computes lineTotal locally but discards it when calling addItem(id, totalPouches), causing the price mismatch described above. Suggest storing {id, qty, unitPrice?} in cart items.",
+    "Contact form: browser HTML5 required attribute on <input type='email'> may pre-empt custom validation for bad email; the JS error path is only reachable when message.length < 5. Consider stripping 'required' or move validation server-side. Not a critical bug for a frontend-only build.",
+    "Footer newsletter Fetch: no request timeout/AbortController — if backend hangs, spinner sticks on 'Sending'. Consider adding a 10s timeout.",
+    "index.css does not declare a @font-face for HopsAndBarley/RustyHooks fallback weights; only Regular is registered — matches spec but noting for future.",
+    "FlavourContext directly mutates document.body via setAttribute — this is fine but could conflict with SSR if ever adopted. Acceptable for CRA/frontend-only build.",
+    "Contact.jsx has [PLACEHOLDER] copy leaking into rendered output; Shop.jsx same issue — must be removed before launch."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_krunchmate_api.py (new)"
+  ],
+  "success_rate": {
+    "backend": "100%",
+    "frontend": "~95%"
+  },
+  "test_credentials": "N/A — no auth in this build",
+  "seed_data_creation": "None — frontend-only cart with in-memory state; backend has no DB models.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend has only two endpoints (/api/health, /api/subscribe). pytest suite at /app/backend/tests/test_krunchmate_api.py is stable. On the frontend, the only material bug is the Shop pack discount not propagating to the cart — verify subtotal after clicking shop-add-* buttons matches the £X.XX shown next to the qty selector. Cart is intentionally non-persistent (resets on refresh). Contact form is intentionally frontend-only (no /api/contact endpoint). Self-hosted fonts confirmed working (FuturaBkBT, BethEllen); no Google Fonts CDN calls. British English confirmed (flavour/colour present, no American variants).",
+  "rca of the issue": "Shop discount mismatch — Root cause: /app/frontend/src/pages/Shop.jsx computes `lineTotal = flavour.price * totalPouches * unitDiscount` for the price display, but calls `addItem(flavour.id, totalPouches)` which passes only quantity. In /app/frontend/src/context/CartContext.jsx, `lineTotal` is derived as `FLAVOURS[it.id].price * it.qty` — the discount factor is lost. Fix: extend the cart item schema to `{id, qty, unitPrice}` (or add a `discountedUnitPrice` field) and update `detailed` accumulator to use it when present. Reproduction: /shop → click shop-pack-salt-vinegar-3 → click shop-add-salt-vinegar → observe drawer subtotal £11.25 while page label showed £10.69."
+}

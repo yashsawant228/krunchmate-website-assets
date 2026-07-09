@@ -1,0 +1,400 @@
+/* ============================================================
+   KrunchMate — Global Styles
+   Source of truth: KrunchMate-Guideline.pdf
+   Colours:
+     Teal palette  (Salt & Vinegar): #082D33, #1A525F, #30716C, #3E9C93, #1D2528
+     Brown palette (Peanut Butter):  #2E1412, #572F20, #7D4124, #9A4D22, #CE7E59
+     Constants:    #F6A81E (gold), #FFFBE5 (cream)
+   Typography:
+     Headings  → Futura Bk BT Book
+     Body      → Helvetica
+     Accents   → Rusty Hooks, Hops And Barley, Beth Ellen
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- Self-hosted fonts (from repo) ---------- */
+@font-face {
+  font-family: "FuturaBkBT";
+  src: url("./assets/fonts/FuturaBkBT-Book.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "FuturaBkBT";
+  src: url("./assets/fonts/FuturaBkBT-BookItalic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "FuturaBkBT";
+  src: url("./assets/fonts/FuturaMdBT-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "FuturaBkBT";
+  src: url("./assets/fonts/Futura-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Helvetica";
+  src: url("./assets/fonts/Helvetica-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "BethEllen";
+  src: url("./assets/fonts/BethEllen-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "RustyHooks";
+  src: url("./assets/fonts/RustyHooks-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "HopsAndBarley";
+  src: url("./assets/fonts/HopsAndBarley-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* ---------- Reset / Base ---------- */
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #082d33;
+  color: #fffbe5;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+  min-height: 100%;
+}
+
+::selection {
+  background: #f6a81e;
+  color: #082d33;
+}
+
+/* Palette CSS variables — swapped globally by FlavourContext */
+:root {
+  --pal-0: #082d33; /* darkest */
+  --pal-1: #1a525f;
+  --pal-2: #30716c;
+  --pal-3: #3e9c93;
+  --pal-ink: #1d2528;
+  --gold: #f6a81e;
+  --cream: #fffbe5;
+  --gradient-anchor: #082d33;
+}
+
+body[data-palette="brown"] {
+  --pal-0: #2e1412;
+  --pal-1: #572f20;
+  --pal-2: #7d4124;
+  --pal-3: #9a4d22;
+  --pal-ink: #2e1412;
+  --gradient-anchor: #7d4124;
+}
+
+body {
+  transition: background-color 900ms cubic-bezier(0.19, 1, 0.22, 1),
+    color 900ms cubic-bezier(0.19, 1, 0.22, 1);
+  background-color: var(--pal-0);
+}
+
+/* ---------- Typography utilities ---------- */
+.font-display {
+  font-family: "FuturaBkBT", sans-serif;
+  letter-spacing: -0.01em;
+}
+.font-body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.font-beth {
+  font-family: "BethEllen", cursive;
+}
+.font-rusty {
+  font-family: "RustyHooks", cursive;
+  letter-spacing: 0.02em;
+}
+.font-hops {
+  font-family: "HopsAndBarley", cursive;
+}
+
+/* ---------- Reusable palette-aware utilities ---------- */
+.bg-palette-0 { background-color: var(--pal-0); }
+.bg-palette-1 { background-color: var(--pal-1); }
+.bg-palette-2 { background-color: var(--pal-2); }
+.bg-palette-3 { background-color: var(--pal-3); }
+.text-palette-3 { color: var(--pal-3); }
+.text-gold { color: var(--gold); }
+.text-cream { color: var(--cream); }
+.bg-gold { background-color: var(--gold); }
+.bg-cream { background-color: var(--cream); }
+.border-cream { border-color: var(--cream); }
+.border-gold { border-color: var(--gold); }
+
+.gradient-hero {
+  background: radial-gradient(
+      ellipse at 30% 20%,
+      color-mix(in srgb, var(--pal-3) 45%, transparent) 0%,
+      transparent 55%
+    ),
+    linear-gradient(160deg, var(--pal-0) 0%, var(--gradient-anchor) 65%, var(--pal-1) 100%);
+}
+
+.gradient-story {
+  background: linear-gradient(180deg, var(--pal-0) 0%, var(--pal-1) 55%, var(--pal-0) 100%);
+}
+
+.gradient-flavour {
+  background: radial-gradient(circle at 50% 15%, var(--pal-3) 0%, var(--pal-1) 45%, var(--pal-0) 100%);
+}
+
+/* ---------- Grain texture overlay ---------- */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/></svg>");
+}
+
+/* ---------- Scroll bar ---------- */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--pal-3) 60%, transparent);
+  border-radius: 4px;
+}
+
+/* ---------- Cursor accents ---------- */
+a, button { cursor: pointer; }
+
+/* ---------- Pouch 3D card ---------- */
+.pouch-stage {
+  perspective: 1400px;
+  transform-style: preserve-3d;
+}
+.pouch-3d {
+  transform-style: preserve-3d;
+  transition: transform 700ms cubic-bezier(0.19, 1, 0.22, 1);
+  will-change: transform;
+}
+.pouch-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pouch-face--back {
+  transform: rotateY(180deg);
+}
+.pouch-shadow {
+  position: absolute;
+  bottom: -6%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 40px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, transparent 70%);
+  filter: blur(14px);
+  z-index: -1;
+}
+
+/* ---------- Marquee ---------- */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: inline-flex;
+  animation: marquee 32s linear infinite;
+}
+
+/* ---------- Ticker style badge ---------- */
+.claim-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 1.2rem;
+  color: var(--cream);
+  font-family: "FuturaBkBT", sans-serif;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  letter-spacing: 0.22em;
+  white-space: nowrap;
+}
+.claim-badge svg { color: var(--gold); }
+
+/* ---------- Cart fill animation strip ---------- */
+.pouch-fill-bar {
+  position: relative;
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cream) 22%, transparent);
+  overflow: hidden;
+}
+.pouch-fill-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: var(--fill, 0%);
+  background: var(--gold);
+  border-radius: 999px;
+  transition: width 600ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* ---------- Number counter ---------- */
+.product-no {
+  font-family: "FuturaBkBT", sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  font-size: 0.75rem;
+  color: var(--cream);
+  opacity: 0.7;
+}
+
+/* ---------- Fluid heading ---------- */
+.h-hero {
+  font-size: clamp(3rem, 9vw, 8rem);
+  line-height: 0.92;
+  font-weight: 500;
+}
+.h-section {
+  font-size: clamp(2rem, 5vw, 4.25rem);
+  line-height: 1.02;
+  font-weight: 500;
+}
+
+/* ---------- Buttons ---------- */
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.6rem;
+  background: var(--gold);
+  color: #1D2528;
+  font-family: "FuturaBkBT", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  border-radius: 999px;
+  transition: transform 300ms ease, box-shadow 300ms ease, background 300ms ease;
+  border: 1px solid var(--gold);
+}
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px -12px color-mix(in srgb, var(--gold) 60%, transparent);
+}
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.6rem;
+  background: transparent;
+  color: var(--cream);
+  border: 1px solid color-mix(in srgb, var(--cream) 55%, transparent);
+  font-family: "FuturaBkBT", sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  border-radius: 999px;
+  transition: all 300ms ease;
+}
+.btn-ghost:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* ---------- Section wrappers ---------- */
+.section {
+  position: relative;
+  padding: clamp(4rem, 8vw, 8rem) clamp(1.25rem, 4vw, 3rem);
+  overflow: hidden;
+}
+.container-x {
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ---------- Reveal ---------- */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 900ms cubic-bezier(0.19, 1, 0.22, 1) both; }
+
+/* ---------- Underline hover ---------- */
+.link-underline {
+  position: relative;
+  padding-bottom: 4px;
+}
+.link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 400ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+.link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ---------- Cart drawer ---------- */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 45, 51, 0.55);
+  backdrop-filter: blur(6px);
+  z-index: 90;
+}
+.drawer {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100dvh;
+  width: min(440px, 92vw);
+  background: var(--pal-0);
+  color: var(--cream);
+  z-index: 100;
+  box-shadow: -30px 0 80px rgba(0, 0, 0, 0.35);
+  border-left: 1px solid color-mix(in srgb, var(--cream) 10%, transparent);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Small responsive helpers ---------- */
+@media (max-width: 640px) {
+  .h-hero { letter-spacing: -0.02em; }
+}
