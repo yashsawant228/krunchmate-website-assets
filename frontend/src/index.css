@@ -77,6 +77,39 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global text-wrap safety net — prevents long words/URLs from forcing
+   horizontal overflow inside cards, headings, forms and cart lines. */
+h1, h2, h3, h4, h5, h6, p, li, dt, dd, a, span, blockquote {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* Flex/grid children shrinkability — the #1 cause of desktop overlap is
+   flex items with implicit `min-width: auto`. This lets any flex/grid
+   child shrink below its intrinsic content size instead of forcing the
+   parent to grow. Kept minimal / non-breaking. */
+.container-x,
+.container-x > *,
+[class*="lg:flex-row"] > *,
+[class*="lg:grid-cols"] > *,
+[class*="md:grid-cols"] > *,
+[class*="grid-cols"] > * {
+  min-width: 0;
+}
+
+/* Media never overflows its container. `height: auto` is deliberately
+   NOT set globally because absolute-positioned pouch faces rely on
+   inset:0 sizing — those override via their own rules. */
+img, video, svg {
+  max-width: 100%;
+}
+
+/* Pouch viewer stage keeps its inline width but is capped by the
+   available column width on smaller desktops / 125% zoom. */
+.pouch-stage {
+  max-width: 100%;
+}
+
 html,
 body {
   margin: 0;
@@ -279,14 +312,18 @@ a, button { cursor: pointer; }
 
 /* ---------- Fluid heading ---------- */
 .h-hero {
-  font-size: clamp(3rem, 9vw, 8rem);
-  line-height: 0.92;
+  font-size: clamp(2.5rem, 7.5vw, 6.5rem);
+  line-height: 0.95;
   font-weight: 500;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 .h-section {
-  font-size: clamp(2rem, 5vw, 4.25rem);
-  line-height: 1.02;
+  font-size: clamp(1.75rem, 4.5vw, 3.75rem);
+  line-height: 1.05;
   font-weight: 500;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 /* ---------- Buttons ---------- */

@@ -1,0 +1,30 @@
+{
+  "summary": "CSS-only regression pass for KrunchMate layout fixes at three viewport widths (1280 proxy 100%, 1024 proxy 125%, 1600 proxy 90%). Backend 4/4 pytest passing. Frontend: no horizontal scrollbar on any of 5 pages (Home/Shop/About/FAQ/Contact) at any of the 3 widths (15/15 combos scrollWidth == clientWidth). Hero headline does not overflow left column at 1024; hero and pouch bounding rects do not intersect; nav does not collide. Flavour switch (PB <-> S&V) causes only a 9px height delta (visually stable). Cart drawer at 1024x700 fits within viewport with checkout button fully visible. Three-pillars/reviews/bundle sections render as 3-column grids at 1600 with no overflow. Shop pack discount regression is now FIXED — 3x Salt & Vinegar cart subtotal reads £10.68 exactly as required.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_krunchmate_api.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "CSS fixes cleanly target the four root causes described. overflow-wrap, min-width:0 on flex/grid children, capped .pouch-stage, and reduced clamp() maxes prevent all observed overflow at 1024/1280/1600.",
+    "One minor testing note: initial Home page networkidle timed out due to hero video/font loading — using domcontentloaded works fine. Not a bug, just a slow initial paint."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "N/A",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Layout at 1280/1024/1600 all clean. Backend has two endpoints; pytest at /app/backend/tests/test_krunchmate_api.py is stable. Shop discount (3x SV -> £10.68) was previously broken in iteration 1 and is now confirmed working — no regression. Cart drawer overlays the whole viewport when open, so any test needing footer interaction should close the drawer first (this is only a test flow consideration, not a bug).",
+  "per_viewport_per_page_results": {
+    "1280x900": {"/": "OK", "/shop": "OK", "/about": "OK", "/faq": "OK", "/contact": "OK"},
+    "1024x700": {"/": "OK", "/shop": "OK", "/about": "OK", "/faq": "OK", "/contact": "OK"},
+    "1600x900": {"/": "OK", "/shop": "OK", "/about": "OK", "/faq": "OK", "/contact": "OK"}
+  }
+}
