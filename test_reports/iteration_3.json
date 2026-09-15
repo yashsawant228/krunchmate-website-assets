@@ -1,0 +1,70 @@
+{
+  "summary": "Phase-4 regression pack for KrunchMate. Backend 4/4 pytest passing (no changes). Frontend: 3D pouches render for both flavours; Salt & Vinegar pouch label 'KRUNCH MATE' is right-side up and legible (QA item resolved for SV). Peanut Butter pouch label appears HORIZONTALLY MIRRORED (KRUNCH MATE reads 'ETAM HCNURK' — QA item NOT resolved for PB). Palette + 3D flavour switch on PB pill works (teal->brown). Rotate arrow buttons present and clickable. About timeline (Early/Late 2024/2025) all 4 items render + about-cta-rajesh navigates correctly. Contact email (contact@krunchmate.com) + head-office address correct. Story page (/story-behind-your-krunch) fully renders — h1, direct-answer, all 5 body sections, signature, YouTubeFacade. YouTubeFacade fires ZERO requests to youtube.com/googlevideo.com before click; after click, iframe loads youtube-nocookie.com/embed/GAuCQe2qqro (correct). Footer tagline 'Snack Smarter, Krunch Now!' present on Story page; Rajesh's story link present in Company column. Shop 3-pack £6.00 and single-tier £2.50 work. Newsletter POST /api/subscribe returns 200 and success shown. Deployment package files exist including .env.example, deploy.sh executable. NEW BUG: 6-pack tier and Krunch-Six/Office bundles overcharge by £0.02 / £0.04 due to unit-price rounding (10/6 -> 1.67 -> ×6 = £10.02 vs £10.00 expected).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "PouchScene / GLB (peanut-butter model)",
+        "issue": "The printed 'KRUNCH MATE' label and 'PEANUT BUTTER' flavour title on the PB pouch render HORIZONTALLY MIRRORED in the 3D scene. The SV pouch renders correctly right-side up. The two GLBs likely have different UV winding, so the UV-flip fix applied to correct the raw texture only lands right for one flavour. Visually confirmed in .screenshots/home_pb_hero.jpg vs home_sv.jpg.",
+        "selector": "PouchViewer3D on Home hero with PB flavour selected",
+        "priority": "HIGH"
+      },
+      {
+        "component": "Shop.jsx / BundleUpsell.jsx (unit-price rounding)",
+        "issue": "6-pack cart subtotal reads £10.02 instead of £10.00. Root cause: /app/frontend/src/pages/Shop.jsx line 14 computes `unit: t.price / t.qty` = 10/6 = 1.6666..., then line 26 rounds to 1.67 via toFixed(2), and cart totals as 6 × 1.67 = £10.02. Same bug in BundleUpsell.jsx: The Krunch Six -> £10.02 (verified), The Office Stash -> £20.04 (by inspection). Mix-and-match test (3×SV + 6×PB) will therefore total £16.02 not the required £16.00. The Duo (£5.00, 2×£2.50) is unaffected. 3-pack (£6.00, 3×£2.00) is unaffected. Fix: pass the exact per-unit division (no toFixed) and let CartContext compute lineTotal, OR extend cart item schema to carry a lineTotal override for tier-priced groups.",
+        "selector": "[data-testid=\"shop-add-peanut-butter\"] after shop-pack-peanut-butter-6 / [data-testid=\"bundle-add-krunch-6\"] / [data-testid=\"cart-subtotal\"]",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_krunchmate_api.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "verified_acceptance_criteria": {
+    "hero_sv_label_legible": true,
+    "hero_pb_label_legible": false,
+    "hero_pb_pill_switches_palette_and_3D": true,
+    "rotate_buttons_present_and_clickable": true,
+    "about_timeline_4_items": true,
+    "contact_email_and_address_correct": true,
+    "footer_tagline_snack_smarter": true,
+    "shop_3pack_sv_6.00": true,
+    "shop_6pack_pb_10.00": false,
+    "mix_and_match_16.00": false,
+    "bundle_krunch_six_10.00": false,
+    "story_page_h1_and_5_sections": true,
+    "story_direct_answer_and_signature": true,
+    "youtube_facade_no_prefetch_and_correct_iframe": true,
+    "about_cta_rajesh_navigates": true,
+    "footer_rajesh_story_link": true,
+    "cart_fill_status_updates": true,
+    "footer_newsletter_success": true,
+    "backend_health_and_subscribe": true,
+    "deploy_package_files_exist": true,
+    "deploy_sh_executable": true,
+    "lighthouse_mobile": "NOT_RUN — Lighthouse CLI not part of test harness in this env; recommend main agent run PageSpeed Insights or lighthouse-cli against the preview URL and report LCP/CLS/INP itself."
+  },
+  "action_items": [
+    "HIGH: Fix Peanut Butter GLB UV / mesh rotation — the KRUNCH MATE label and PEANUT BUTTER flavour title render horizontally mirrored. SV pouch is correct, so the fix likely lives inside PouchScene.jsx as a per-model UV/scale.x flip conditional on flavour.id === 'peanut-butter', or the PB GLB needs re-exporting with corrected UVs.",
+    "HIGH: Fix unit-price rounding for 6-pack and bundle tiers. Preferred fix: in Shop.jsx PACK_OPTIONS, do not pre-round unit — pass tier.price/tier.qty as-is to addItem, or (cleaner) extend CartContext to accept a per-line lineTotal (tier price × qty) and use it in the detailed accumulator when present. In BundleUpsell.jsx the same +(price/count).toFixed(2) rounding pattern must be reworked. This fails three explicit acceptance criteria: shop 6-pack £10.00, mix-and-match £16.00, bundle Krunch Six £10.00.",
+    "OPTIONAL: Main agent should run Lighthouse mobile on /, /shop, /story-behind-your-krunch and report LCP/INP/CLS. Was not run in this test iteration."
+  ],
+  "critical_code_review_comments": [
+    "Shop.jsx line 14 (`unit: t.price / t.qty`) combined with line 26 (`+pack.unit.toFixed(2)`) produces a pre-rounded per-unit price that no longer multiplies back to the tier total. This is the root cause of the £10.02 bug and it is trivially avoidable by always deriving lineTotal from the tier price × selected qty, not from a rounded unit.",
+    "BundleUpsell.jsx repeats the same anti-pattern (`unit: +(10/6).toFixed(2)`). Any tier where price/qty is not a terminating decimal in 2 dp will exhibit this. Consider adding a shared cart helper `addTier({id, qty, tierPrice})` so the tier total is authoritative and unit price is only a display value.",
+    "YouTubeFacade currently loads a poster thumbnail from i.ytimg.com pre-click. This does NOT hit youtube.com or googlevideo.com (verified — 0 requests to those hosts before click), so it satisfies the AC as written, but strictly speaking i.ytimg.com IS a Google-owned CDN. If the intent is full third-party isolation until click, the thumbnail should also be self-hosted or lazy-loaded from a first-party proxy.",
+    "PouchViewer3D + PouchScene: because the two GLBs likely have opposing UV winding, applying a single global UV flip in the shader/material corrects one flavour and mirrors the other. A per-flavour flag (e.g. `mirrorUV: true` in the flavour data) piped into the material's `map.repeat.x = -1` is the smallest safe fix.",
+    "React Router future-flag warnings (v7_startTransition, v7_relativeSplatPath) fire on every route — not a bug, but worth suppressing before ship to keep console clean."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "~80% (6 of 11 shop/bundle/hero AC pass; 5 fail on the two bugs above)"},
+  "test_credentials": "N/A — no auth in this build",
+  "seed_data_creation": "None",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Two bugs found: (1) PB pouch texture is horizontally mirrored in the 3D scene while SV is correct — visual only, reproduce by loading / and clicking hero-flavour-pill-peanut-butter; (2) unit-price rounding pushes 6-pack and Krunch-Six/Office-Stash bundles to £10.02/£20.04 instead of £10.00/£20.00. Backend pytest at /app/backend/tests/test_krunchmate_api.py (4 tests) is stable and unchanged. Deployment package at /app/deploy/ has all 5 files including .env.example. YouTube facade correctly avoids youtube.com/googlevideo.com prefetch — verified via page.on('request'). Story page and all Story testids present. Cart is in-memory and resets on reload — use that instead of a 'clear cart' selector in tests. When testing the shop 'add' button consecutively for two flavours, close the cart drawer between clicks via [data-testid=cart-close] because the drawer overlay intercepts pointer events on the shop grid.",
+  "rca of the issue": "Bug 1 (pricing £10.02): Shop.jsx PACK_OPTIONS eagerly stores `unit = t.price/t.qty` and then Shop.jsx line 26 rounds it (`+pack.unit.toFixed(2) = 1.67`). CartContext.jsx line 53 computes lineTotal as `unit × qty` giving 1.67 × 6 = 10.02. Same in BundleUpsell.jsx line 26 (`+(10/6).toFixed(2)`). Fix: always source cart line total from tier price (£10.00) × selectedQty, not from a rounded per-unit. Bug 2 (PB pouch mirrored): the raw pouch texture was upside-down and was corrected at render time; that correction works for the SV GLB but the PB GLB has opposite UV winding, so the same correction mirrors it. Fix: apply the UV flip conditionally per flavour."
+}

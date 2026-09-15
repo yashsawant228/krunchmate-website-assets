@@ -21,9 +21,9 @@ const BUNDLES = [
     name: "The Krunch Six",
     subtitle: "3 × Salt & Vinegar · 3 × Peanut Butter",
     contents: [{ id: "salt-vinegar", qty: 3 }, { id: "peanut-butter", qty: 3 }],
-    // 6 pouches priced at the 6-pack tier (£1.67/pouch)
+    // 6 pouches priced at the 6-pack tier (£1.67/pouch display; exact 10/6)
     price: 10.00,
-    unit: +(10 / 6).toFixed(2),
+    unit: 10 / 6,
     save: "Mix-and-match · £1.67 per pouch",
     tag: "Most loved",
   },
@@ -34,7 +34,7 @@ const BUNDLES = [
     contents: [{ id: "salt-vinegar", qty: 6 }, { id: "peanut-butter", qty: 6 }],
     // 12 pouches = two 6-pack tiers
     price: 20.00,
-    unit: +(20 / 12).toFixed(2),
+    unit: 20 / 12,
     save: "Two boxes · £1.67 per pouch",
     tag: "Best value",
   },

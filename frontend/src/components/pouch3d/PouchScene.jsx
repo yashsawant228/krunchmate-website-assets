@@ -12,7 +12,7 @@ useGLTF.preload("/models/pouch-peanut-butter.glb");
  * Pouch — loads the flavour-specific GLB and exposes rotation via refs.
  * Auto-rotate respects prefers-reduced-motion.
  */
-function Pouch({ modelUrl, autoRotate, rotationTarget, prefersReducedMotion }) {
+function Pouch({ modelUrl, autoRotate, rotationTarget, prefersReducedMotion, mirrorTexture }) {
   const groupRef = useRef();
   const { scene } = useGLTF(modelUrl);
   const clone = React.useMemo(() => scene.clone(true), [scene]);
@@ -33,22 +33,33 @@ function Pouch({ modelUrl, autoRotate, rotationTarget, prefersReducedMotion }) {
     clone.traverse((o) => {
       if (o.isMesh && o.material) {
         o.material.envMapIntensity = 0.7;
+        // Some GLBs ship with opposite UV winding — flip the diffuse map
+        // horizontally so the printed labels read right-way-round.
+        if (mirrorTexture && o.material.map) {
+          const m = o.material.map.clone();
+          m.wrapS = THREE.RepeatWrapping;
+          m.repeat.x = -1;
+          m.offset.x = 1;
+          m.needsUpdate = true;
+          o.material.map = m;
+        }
         o.material.needsUpdate = true;
       }
     });
     return clone;
-  }, [clone]);
+  }, [clone, mirrorTexture]);
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
-    // Ease toward the drag target, and apply a gentle idle sway unless the
-    // user prefers reduced motion.
     const g = groupRef.current;
+    // Idle sway (±14° around the forward axis) — never lets the pouch go
+    // edge-on / backwards, which would make the printed label read mirrored.
+    if (autoRotate && !prefersReducedMotion && !rotationTarget.current.dragging) {
+      const target = Math.sin(state.clock.elapsedTime * 0.6) * (14 * Math.PI / 180);
+      rotationTarget.current.y = target;
+    }
     g.rotation.y += (rotationTarget.current.y - g.rotation.y) * Math.min(1, delta * 6);
     g.rotation.x += (rotationTarget.current.x - g.rotation.x) * Math.min(1, delta * 6);
-    if (autoRotate && !prefersReducedMotion && !rotationTarget.current.dragging) {
-      rotationTarget.current.y += delta * 0.15;
-    }
   });
 
   return <primitive object={fitted} ref={groupRef} />;
@@ -130,6 +141,7 @@ export default function PouchScene({ flavour, autoRotate }) {
           autoRotate={autoRotate}
           rotationTarget={rotationTarget}
           prefersReducedMotion={prefersReducedMotion}
+          mirrorTexture={!!flavour.mirrorTexture}
         />
 
         <ContactShadows position={[0, -1.15, 0]} opacity={0.5} scale={4} blur={2.4} far={2} />

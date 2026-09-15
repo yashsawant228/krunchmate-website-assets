@@ -11,6 +11,8 @@ const PACK_OPTIONS = PACK_TIERS.map((t) => ({
   label: t.label,
   subtitle: t.subtitle,
   price: t.price,
+  // Keep full precision — do NOT round here. Any rounding at the per-unit
+  // level breaks tier totals that don't divide evenly (e.g. £10 / 6).
   unit: t.price / t.qty,
 }));
 
@@ -22,8 +24,9 @@ function ShopCard({ flavour }) {
 
   const pack = PACK_OPTIONS[packIdx];
   const totalPouches = pack.qty * qty;
-  // Effective unit price is fixed per tier from PACK_TIERS.
-  const effectiveUnit = +pack.unit.toFixed(2);
+  // Effective per-unit price used only as the cart-line group key + display.
+  // Full precision preserved — never toFixed here, or 6 × 1.67 = £10.02.
+  const effectiveUnit = pack.unit;
   const lineTotal = +(pack.price * qty).toFixed(2);
 
   return (
