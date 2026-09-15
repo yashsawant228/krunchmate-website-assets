@@ -14,9 +14,10 @@ export const FLAVOURS = {
       "A crackling hit of British vinegar and hand-flaked sea salt, popped into feather-light water-lily seeds. Cinema-quality crunch, zero guilt.",
     long:
       "Sourced from the still ponds of Bihar, our makhana is popped small-batch, dusted with malt vinegar, sea salt and a whisper of black pepper. It is the crunch you remember from the corner chippy — reborn as a snack you can actually feel good about.",
-    price: 3.75,
-    servings: "6 servings",
-    weight: "60g",
+    price: 2.50,
+    servings: "3 servings",
+    weight: "30g",
+    model: "/models/pouch-salt-vinegar.glb",
     front: "/images/sv-front.png",
     back: "/images/sv-back.png",
     angle1: "/images/sv-angle1.png",
@@ -50,9 +51,10 @@ export const FLAVOURS = {
       "Roasted-peanut warmth and a soft caramel finish, coating every lily-seed pop. Comfort in a pouch.",
     long:
       "We slow-tumble popped water-lily seeds in stone-ground peanut paste and a mere touch of coconut sugar. The result: a nutty, mildly sweet snack with proper protein and none of the palm-oil greasiness.",
-    price: 3.75,
-    servings: "6 servings",
-    weight: "60g",
+    price: 2.50,
+    servings: "3 servings",
+    weight: "30g",
+    model: "/models/pouch-peanut-butter.glb",
     front: "/images/pb-front.png",
     back: "/images/pb-back.png",
     angle1: "/images/pb-angle1.png",
@@ -76,6 +78,17 @@ export const FLAVOURS = {
     claims: ["Vegan", "Gluten-free", "Source of protein", "No palm oil"],
   },
 };
+
+// Single source of pack pricing — every per-unit callout reads from here.
+// Confirmed by user: mix-and-match is priced identically to single-flavour
+// tiers at every pack size, so no separate mix-and-match tier exists.
+export const PACK_TIERS = [
+  { qty: 1, label: "Single pouch", subtitle: "1 × 30g", price: 2.50 },
+  { qty: 3, label: "3-pack", subtitle: "3 × 30g · £2.00 per pouch", price: 6.00 },
+  { qty: 6, label: "Box of 6", subtitle: "6 × 30g · £1.67 per pouch", price: 10.00 },
+];
+
+export const perUnit = (tier) => tier.price / tier.qty;
 
 export const FLAVOUR_LIST = [FLAVOURS["salt-vinegar"], FLAVOURS["peanut-butter"]];
 

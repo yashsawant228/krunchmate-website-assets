@@ -11,6 +11,7 @@ import Shop from "./pages/Shop";
 import About from "./pages/About";
 import FAQ from "./pages/FAQ";
 import Contact from "./pages/Contact";
+import StoryBehindYourKrunch from "./pages/StoryBehindYourKrunch";
 import "./App.css";
 
 function ScrollToTop() {
@@ -32,6 +33,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/about" element={<About />} />
+            <Route path="/story-behind-your-krunch" element={<StoryBehindYourKrunch />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="*" element={<Home />} />

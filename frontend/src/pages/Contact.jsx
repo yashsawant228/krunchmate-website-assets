@@ -37,18 +37,27 @@ export default function Contact() {
                 <Mail size={18} className="text-[color:var(--gold)] mt-1" />
                 <div>
                   <div className="font-display uppercase tracking-[0.22em] text-[10px] text-cream/60">Email</div>
-                  <div className="mt-1">hello@krunchmate.co.uk</div>
+                  <a
+                    href="mailto:contact@krunchmate.com"
+                    className="mt-1 block link-underline"
+                    data-testid="contact-email-link"
+                  >
+                    contact@krunchmate.com
+                  </a>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <MapPin size={18} className="text-[color:var(--gold)] mt-1" />
                 <div>
                   <div className="font-display uppercase tracking-[0.22em] text-[10px] text-cream/60">Head office</div>
-                  <div className="mt-1">
-                    KrunchMate Ltd.<br />
-                    Unit 12, The Small-Batch Kitchen<br />
-                    London EC1V 9BW · United Kingdom
-                  </div>
+                  <address className="mt-1 not-italic" data-testid="contact-address">
+                    Krunchmate Ltd.<br />
+                    71-75 Shelton Street<br />
+                    Covent Garden<br />
+                    London<br />
+                    United Kingdom<br />
+                    WC2H 9JQ
+                  </address>
                 </div>
               </div>
             </div>

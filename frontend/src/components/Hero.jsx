@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useFlavour } from "../context/FlavourContext";
 import { useCart } from "../context/CartContext";
-import PouchViewer from "./PouchViewer";
+import PouchViewer3D from "./PouchViewer3D";
 
 export default function Hero() {
   const { active, list, setFlavour } = useFlavour();
@@ -123,7 +123,7 @@ export default function Hero() {
                 background: `radial-gradient(circle, ${active.colors[3]}55 0%, transparent 60%)`,
               }}
             />
-            <PouchViewer flavour={active} size="lg" />
+            <PouchViewer3D flavour={active} size="lg" />
           </motion.div>
 
           <div className="absolute top-4 right-4 hidden lg:block text-right">

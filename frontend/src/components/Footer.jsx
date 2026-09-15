@@ -12,6 +12,7 @@ const SHOP_LINKS = [
 
 const COMPANY_LINKS = [
   { to: "/about", label: "Our story" },
+  { to: "/story-behind-your-krunch", label: "Rajesh's story" },
   { to: "/faq", label: "FAQ" },
   { to: "/contact", label: "Contact" },
   { to: "/contact", label: "Wholesale" },
@@ -79,7 +80,7 @@ export default function Footer() {
 
         <div className="pt-6 border-t border-cream/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-cream/45 text-xs">
           <div>© {new Date().getFullYear()} KrunchMate Ltd. Made in the UK.</div>
-          <div className="font-rusty text-[color:var(--gold)] text-lg">popped, never fried.</div>
+          <div className="font-rusty text-[color:var(--gold)] text-lg">Snack Smarter, Krunch Now!</div>
           <div>Registered in England & Wales.</div>
         </div>
       </div>

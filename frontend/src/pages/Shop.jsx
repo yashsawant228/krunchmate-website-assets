@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Plus, Minus, ShoppingBag, RotateCw } from "lucide-react";
-import { FLAVOUR_LIST } from "../data/flavours";
+import { FLAVOUR_LIST, PACK_TIERS } from "../data/flavours";
 import { useCart } from "../context/CartContext";
 import { useFlavour } from "../context/FlavourContext";
-import PouchViewer from "../components/PouchViewer";
+import PouchViewer3D from "../components/PouchViewer3D";
 
-const PACK_OPTIONS = [
-  { qty: 1, label: "Single pouch", subtitle: "Try before you commit" },
-  { qty: 3, label: "3-pack", subtitle: "Save 5%" },
-  { qty: 6, label: "6-pack", subtitle: "Save 10% · Free UK delivery" },
-];
+const PACK_OPTIONS = PACK_TIERS.map((t) => ({
+  qty: t.qty,
+  label: t.label,
+  subtitle: t.subtitle,
+  price: t.price,
+  unit: t.price / t.qty,
+}));
 
 function ShopCard({ flavour }) {
   const { addItem } = useCart();
@@ -19,10 +21,10 @@ function ShopCard({ flavour }) {
   const [qty, setQty] = useState(1);
 
   const pack = PACK_OPTIONS[packIdx];
-  const DISCOUNTS = { 3: 0.95, 6: 0.9 };
-  const unitDiscount = DISCOUNTS[pack.qty] ?? 1;
   const totalPouches = pack.qty * qty;
-  const lineTotal = flavour.price * totalPouches * unitDiscount;
+  // Effective unit price is fixed per tier from PACK_TIERS.
+  const effectiveUnit = +pack.unit.toFixed(2);
+  const lineTotal = +(pack.price * qty).toFixed(2);
 
   return (
     <motion.article
@@ -40,7 +42,7 @@ function ShopCard({ flavour }) {
       <div className="p-8 lg:p-10 grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
         {/* Pouch viewer */}
         <div className="flex items-center justify-center relative min-h-[420px]">
-          <PouchViewer flavour={flavour} size="md" />
+          <PouchViewer3D flavour={flavour} size="md" />
           <div
             className="absolute top-2 left-2 flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] uppercase tracking-[0.22em] font-display"
             style={{ borderColor: "rgba(255,251,229,0.35)", color: "#FFFBE5" }}
@@ -124,7 +126,6 @@ function ShopCard({ flavour }) {
 
           <button
             onClick={() => {
-              const effectiveUnit = +(flavour.price * unitDiscount).toFixed(2);
               addItem(flavour.id, totalPouches, effectiveUnit);
             }}
             className="mt-6 btn-gold self-start"

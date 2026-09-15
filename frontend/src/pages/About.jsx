@@ -1,25 +1,26 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Leaf, Waves, Sparkles, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Leaf, Waves, Sparkles, MapPin, ArrowRight } from "lucide-react";
 
 const TIMELINE = [
   {
-    year: "2022",
+    year: "Early 2024",
     title: "A pond in Bihar",
     body: "Our founders visit smallholder makhana farmers in Darbhanga and taste the raw, un-adulterated version of what would become KrunchMate. The obsession begins.",
   },
   {
-    year: "2023",
+    year: "Late 2024",
     title: "The UK kitchen",
     body: "After 47 recipe iterations, we lock in two hero flavours — Salt & Vinegar for the classic British palate, and Peanut Butter for those who prefer their krunch on the sweet side.",
   },
   {
-    year: "2024",
+    year: "Early 2025",
     title: "First pouch, first krunch",
     body: "Launched to independent delis and specialist grocers across London, Manchester and Bristol. Sold out in six weeks.",
   },
   {
-    year: "2026",
+    year: "Late 2025",
     title: "Nationwide",
     body: "This is the year we come to your corner shop. Same tiny farms, same slow-tumble, same obsession — just at scale.",
   },
@@ -45,6 +46,15 @@ export default function About() {
               Two years and forty-seven test batches later, here we are. Every pouch you hold is the
               answer to that question.
             </p>
+            <div className="mt-8">
+              <Link
+                to="/story-behind-your-krunch"
+                className="btn-gold"
+                data-testid="about-cta-rajesh"
+              >
+                Read Rajesh's full story <ArrowRight size={16} />
+              </Link>
+            </div>
           </div>
           <div className="lg:col-span-5 relative">
             <motion.div

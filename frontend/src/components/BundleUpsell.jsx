@@ -10,8 +10,10 @@ const BUNDLES = [
     name: "The Duo",
     subtitle: "1 × Salt & Vinegar · 1 × Peanut Butter",
     contents: [{ id: "salt-vinegar", qty: 1 }, { id: "peanut-butter", qty: 1 }],
-    price: 6.9,
-    save: "Save £0.60",
+    // 2 pouches priced as single-tier (£2.50 each)
+    price: 5.00,
+    unit: 2.50,
+    save: "Single-pouch price",
     tag: "Starter",
   },
   {
@@ -19,8 +21,10 @@ const BUNDLES = [
     name: "The Krunch Six",
     subtitle: "3 × Salt & Vinegar · 3 × Peanut Butter",
     contents: [{ id: "salt-vinegar", qty: 3 }, { id: "peanut-butter", qty: 3 }],
-    price: 19.5,
-    save: "Save £3.00",
+    // 6 pouches priced at the 6-pack tier (£1.67/pouch)
+    price: 10.00,
+    unit: +(10 / 6).toFixed(2),
+    save: "Mix-and-match · £1.67 per pouch",
     tag: "Most loved",
   },
   {
@@ -28,8 +32,10 @@ const BUNDLES = [
     name: "The Office Stash",
     subtitle: "6 × Salt & Vinegar · 6 × Peanut Butter",
     contents: [{ id: "salt-vinegar", qty: 6 }, { id: "peanut-butter", qty: 6 }],
-    price: 36.0,
-    save: "Save £9.00",
+    // 12 pouches = two 6-pack tiers
+    price: 20.00,
+    unit: +(20 / 12).toFixed(2),
+    save: "Two boxes · £1.67 per pouch",
     tag: "Best value",
   },
 ];
@@ -38,7 +44,7 @@ export default function BundleUpsell() {
   const { addItem, openCart } = useCart();
 
   const addBundle = (b) => {
-    b.contents.forEach((c) => addItem(c.id, c.qty));
+    b.contents.forEach((c) => addItem(c.id, c.qty, b.unit));
     openCart();
   };
 
