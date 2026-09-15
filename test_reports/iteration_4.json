@@ -1,0 +1,47 @@
+{
+  "summary": "Iteration-4 retest of the two HIGH-priority bugs flagged in iteration_3. BOTH FIXES CONFIRMED WORKING. Bug 1 (Peanut Butter pouch label mirroring): loaded / and waited 15s — 'KRUNCH MATE' and 'SALT & VINEGAR' render right-side up on SV; clicked hero-flavour-pill-peanut-butter, waited 15s — 'KRUNCH MATE' and 'PEANUT BUTTER' render right-side up on PB (no mirroring, no upside-down state). The bounded sin() sway in PouchScene.jsx (±14°) correctly prevents the pouch from crossing 90° so the label stays legible indefinitely. Bug 2 (unit-price rounding): PB 6-pack subtotal = £10.00 (was £10.02); SV 6-pack subtotal = £10.00; Bundle 'The Krunch Six' subtotal = £10.00 (was £10.02); Mix-and-match (3xSV + 6xPB with drawer closed between clicks via [data-testid=cart-drawer-close]) subtotal = £16.00 exactly (was £16.02). Regressions all pass: 3-pack SV = £6.00, single SV = £2.50, hero pill switches teal<->brown and 3D pouch swaps SV<->PB GLB, Story page renders (h1, story-direct-answer, 5 story-section-*, story-signature) with ZERO youtube.com/googlevideo.com requests before click, footer contains 'Snack Smarter, Krunch Now!' and Rajesh's story link, About page timeline shows Early 2024 / Late 2024 / Early 2025 / Late 2025 and about-cta-rajesh navigates to /story-behind-your-krunch, Contact page email = mailto:contact@krunchmate.com and address contains WC2H 9JQ. Backend pytest 4/4 pass (health + 3 subscribe cases).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_krunchmate_api.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "verified_acceptance_criteria": {
+    "hero_sv_label_legible_after_15s": true,
+    "hero_pb_label_legible_after_15s": true,
+    "hero_pb_pill_switches_palette_and_3D": true,
+    "shop_6pack_pb_10.00": true,
+    "shop_6pack_sv_10.00": true,
+    "shop_3pack_sv_6.00": true,
+    "shop_single_sv_2.50": true,
+    "bundle_krunch_six_10.00": true,
+    "mix_and_match_16.00": true,
+    "story_page_h1_and_5_sections": true,
+    "story_direct_answer_and_signature": true,
+    "youtube_facade_no_prefetch": true,
+    "about_timeline_4_items": true,
+    "about_cta_rajesh_navigates": true,
+    "contact_email_and_address_correct": true,
+    "footer_tagline_snack_smarter": true,
+    "footer_rajesh_story_link": true,
+    "backend_health_and_subscribe": true
+  },
+  "action_items": [],
+  "critical_code_review_comments": [
+    "React Router v6 future-flag warnings (v7_startTransition, v7_relativeSplatPath) still fire on every route. Cosmetic, but easy to silence by passing future={{v7_startTransition:true, v7_relativeSplatPath:true}} to <BrowserRouter> before ship.",
+    "Footer tagline 'Snack Smarter, Krunch Now!' has no dedicated data-testid; retrieved via text content only. Consider adding data-testid=\"footer-tagline\" to future-proof selector-based tests.",
+    "YouTubeFacade pre-click testid is 'youtube-facade-play'; there is no 'youtube-facade' wrapper testid. Doc/testing agents were assuming the latter — add a stable wrapper testid to reduce selector churn."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100% (all 18 AC pass)"},
+  "test_credentials": "N/A — no auth in this build",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Both HIGH bugs from iteration_3 are now fixed. Correct cart-drawer close selector is [data-testid=\"cart-drawer-close\"] (NOT cart-close as previously assumed). Correct story testids: story-h1, story-direct-answer, story-section-*, story-signature, youtube-facade-play (not youtube-facade). PouchScene.jsx now uses bounded sin() sway so labels never cross 90° — verified stable at 15s and later.",
+  "rca of the issue": "Fixes verified in code: PouchScene.jsx auto-rotate is now a bounded sin() sway (±14°) instead of unbounded accumulation — pouch never turns backwards so label mirroring can never occur. Shop.jsx no longer pre-rounds unit price (toFixed removed), and BundleUpsell.jsx uses raw 10/6 / 20/12 without toFixed, so cart lineTotal = unit*qty now equals the tier total exactly."
+}

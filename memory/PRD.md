@@ -1,51 +1,62 @@
 # KrunchMate — Cinematic DTC Landing Site
 
 ## Original Problem Statement
-Build a landing page that replicates buckssauce.com at 1:1 structural and interaction fidelity, re-skinned as **KrunchMate**, a UK-based makhana (popped water-lily seed) snack brand. Only the two official KrunchMate flavour palettes (Teal for Salt & Vinegar, Brown for Peanut Butter), the gold + cream constants, and the specified typography (Futura Bk BT Book, Helvetica, Beth Ellen / Rusty Hooks / Hops And Barley) are permitted. British English throughout.
+Replicate buckssauce.com structural fidelity, re-skinned as KrunchMate — a UK-based makhana snack brand. Two flavours (Salt & Vinegar / Peanut Butter) with their own palettes, gold + cream constants, and specified typography. British English throughout.
 
-## User Choices (Round 1)
-- **Ecommerce scope**: Frontend-only visual/animation showcase (cart is UI-only, no persistence).
-- **Flavours**: Strictly two — Salt & Vinegar (Teal) and Peanut Butter (Brown).
-- **Product imagery**: Official Krunchmate pouch photography from the connected repo (already delivered into `/app/frontend/public/images/`).
-- **Pages**: Home + Shop + About + FAQ + Contact.
-- **Fonts**: Self-hosted TTF files from the repo (no Google Fonts substitutes).
+## User Choices
+- Ecommerce scope: frontend-only (cart in memory, no real checkout).
+- Flavours: strictly two.
+- Product imagery: official Krunchmate assets from connected repo.
+- Pages: Home + Shop + About + FAQ + Contact (+ /story-behind-your-krunch as of iteration 3).
+- Fonts: self-hosted TTF (Futura Bk BT Book, Helvetica, Beth Ellen, Rusty Hooks, Hops & Barley).
 
 ## Architecture
-- **Frontend**: React 18 + React Router 6 + Framer Motion + Tailwind CSS (CRA scaffolding).
-- **Backend**: Minimal FastAPI service exposing `/api/health` and `/api/subscribe` (frontend-only scope means DB persistence was not required).
-- **State**: `FlavourContext` (site-wide palette via `body[data-palette]`) + `CartContext` (in-memory cart with unit-price override support so multi-pack discounts propagate correctly).
-- **Assets**: Fonts self-hosted from `/src/assets/fonts`; pouch renders and videos from `/public/images` and `/public/videos`.
+- **Frontend**: React 18 + React Router 6 + Framer Motion + Tailwind + `@react-three/fiber` + `@react-three/drei` + `three` for the 3D pouch.
+- **Backend**: Minimal FastAPI stub — `/api/health`, `/api/subscribe`.
+- **State**: `FlavourContext` (body[data-palette]) + `CartContext` (per-line unit-price supports tiered pricing).
+- **Assets**: fonts and images from `/src/assets/fonts` and `/public/images`; GLBs from `/public/models`.
 
-## Implemented (2026-01-09)
-- Sticky animated header with cart drawer trigger, gold badge counter, and mobile hamburger.
-- Full-viewport hero with palette-switching flavour pills, animated "PRODUCT N0. XX" counter, and 3D-rotatable pouch (drag + subtle idle sway; safe from edge-on hiding).
-- Horizontal claims marquee strip with gold sparkle bullets.
-- "Choose Your Krunch" flavour grid — each card in its own palette; click switches site-wide palette.
-- Three-pillar brand story section (Popped-not-fried / Bihar-sourced / Made for the UK).
-- Founder scroll sequence with scroll-triggered palette transition (Teal → Brown), auto-playing pond and kitchen video panels, parallax parallax movement.
-- Bundle upsell (Duo / Krunch Six / Office Stash) — each bundle adds multiple items to the cart drawer.
-- Reviews carousel (auto-rotate + prev/next + dot pagination).
-- Cart drawer with the cinematic "empty pouch → filled → checkout" SVG widget (gold fill level, status text, and progress bar).
-- Sticky mobile add-to-cart bar visible on <lg viewports.
-- Footer with newsletter capture wired to `POST /api/subscribe` and success / error states.
-- Shop, About, FAQ, Contact pages fully populated with brand-compliant colour and typography.
-- Multi-pack pricing (1× / 3× / 6×) with correct discount propagation into the cart.
+## Implementation Log
 
-## Fixed post-testing (iteration 1)
-- Cart now honours the Shop page's discounted unit price (per-line `unitPrice` support).
-- Removed `[PLACEHOLDER — …]` internal notes from Shop, Contact, and About pages.
+### 2026-01-09 — MVP
+Full 5-page site, sticky header + animated cart drawer, hero with palette-switching flavour pills, "Choose Your Krunch" grid, three-pillar section, scroll-triggered founder sequence, bundle upsell, reviews carousel, newsletter capture, mobile sticky bar.
 
-## Known / Deferred
-- Product renders use only front / back keyframes (per user directive). Full 360° angles would require additional photography.
-- No persistent cart / checkout (intentional — frontend showcase scope).
-- Contact form submissions are not persisted (intentional).
+### 2026-01-09 — Code review pass
+CartDrawer split into subcomponents; Footer split; nested ternaries flattened; array-index keys replaced with stable keys.
 
-## Backlog / P1
-- Additional pouch angles for full 360° rotation.
-- Cart persistence via `localStorage` (client-side only, still no server round-trip).
-- Structured data / schema.org markup for product pages.
+### 2026-08-03 — Layout bug fix
+Consolidated CSS-only pass on `index.css` to eliminate desktop layout breaks at 100 / 90 / 125 % zoom: global `overflow-wrap`, `min-width: 0` on flex/grid children, capped `.pouch-stage` / media at `max-width: 100%`, tightened `.h-hero` / `.h-section` clamps and added `hyphens: auto`.
 
-## Backlog / P2
-- Bundle builder ("pick 6, mix your own").
-- Recipe / usage blog section.
-- Founder video hero variant on About.
+### 2026-09-15 — Final production pass
+- **Real 3D pouch viewer** via `@react-three/fiber` — code-split, IntersectionObserver-gated, PNG fallback for data-saver / WebGL-unsupported browsers, drag-to-rotate + keyboard-operable rotate buttons, `prefers-reduced-motion` respected. Auto-rotate is a bounded ±14° sway so labels never turn backwards.
+- **Pricing update**: Single £2.50, 3-pack £6.00 (£2.00/pouch), 6-pack £10.00 (£1.67/pouch) — sourced once from `PACK_TIERS`. Mix-and-match confirmed identical to single-flavour tiers.
+- **Timeline update** on /about — Early 2024 → Late 2025.
+- **Contact update** — `contact@krunchmate.com` + 71-75 Shelton Street, Covent Garden, London, WC2H 9JQ.
+- **Footer tagline** — "Snack Smarter, Krunch Now!"
+- **New page** `/story-behind-your-krunch` — verbatim founder-voice copy about Rajesh, direct-answer AEO block, 5 body sections, sticky TOC, Rajesh illustration hero, YouTube click-to-load facade (`youtube-nocookie.com/embed/GAuCQe2qqro`), keyboard-operable play control, zero third-party requests until user clicks.
+- **Navigation** — About-page "Read Rajesh's full story" CTA + footer Company column "Rajesh's story" link.
+- **Hostinger VPS deployment package** at `/app/deploy/`: `README.md`, `ecosystem.config.js` (PM2 backend + `serve` frontend), `nginx-krunchmate.conf` (SPA + `/api` proxy + GLB long-cache headers), `.env.example`, `deploy.sh` (one-shot install + build + PM2 boot).
+
+### GLB compression decision
+The two shipped GLBs are ~5.2 MB each, uncompressed. **Compression pass NOT applied** in this shipping iteration — the models load lazily on scroll into view so LCP on Home is not affected. Follow-up backlog item: run `gltfpack -c` (meshopt) which typically yields ~1.0-1.5 MB per model, then re-cache via Nginx's `immutable` header on `*.glb`.
+
+### Confirm on your actual Hostinger VPS
+The deployment package targets Ubuntu 22.04/24.04 LTS with Node ≥ 18.18 (script auto-installs 20 LTS). Two knobs need to be verified once the plan is purchased:
+- **Node version**: NodeSource install is used; if your tier blocks NodeSource, drop to `nvm install 20.11.0`.
+- **Build-time RAM**: CRA production build peaks around 1.4 GB. On the 1 GB tier, set `NODE_OPTIONS=--max-old-space-size=768` and add a 2 GB swapfile before `yarn build`. 2 GB+ tiers need no change.
+
+### Testing history
+- iteration_1: 100 % backend / ~95 % frontend — 2 bugs fixed (shop discount, [PLACEHOLDER] copy).
+- iteration_2: 15/15 viewport × page combos clean after CSS fix.
+- iteration_3: 2 HIGH bugs found (PB label mirrored mid-rotation, 6-pack subtotal £10.02).
+- iteration_4: 18/18 AC pass, both HIGH bugs fixed.
+
+## Backlog (P1)
+- Draco / meshopt compression on the two GLBs.
+- `data-testid="footer-tagline"` for future-proof selector-based tests.
+- Silence React Router v7 future-flag warnings.
+
+## Backlog (P2)
+- Additional pouch angles for full 360° model exploration.
+- Persist cart to localStorage for cross-refresh continuity.
+- Wire real Stripe checkout when moving beyond showcase scope.
