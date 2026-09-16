@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, ArrowRight } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import CartFillWidget from "./cart/CartFillWidget";
 import CartLineItem from "./cart/CartLineItem";
 import CartEmptyState from "./cart/CartEmptyState";
+import PreOrderForm from "./PreOrderForm";
 
 /**
  * CartDrawer — recreates the "empty pouch → filled → checkout" progression.
@@ -20,10 +21,24 @@ const resolveStatus = (totalCount, fillLevel) => {
 const lineKey = (it) => `${it.id}|${it.unitPrice ?? "std"}`;
 
 export default function CartDrawer() {
-  const { open, closeCart, detailed, subtotal, updateQty, removeItem, fillLevel, totalCount } =
+  const { open, closeCart, detailed, subtotal, updateQty, removeItem, fillLevel, totalCount, clear } =
     useCart();
+  const [preorderOpen, setPreorderOpen] = useState(false);
 
   const status = resolveStatus(totalCount, fillLevel);
+
+  const startPreorder = () => {
+    setPreorderOpen(true);
+  };
+
+  const closePreorder = () => {
+    // If the user just successfully reserved, clear the cart on close.
+    setPreorderOpen(false);
+    if (detailed.length > 0 && document.querySelector('[data-testid="preorder-success"]')) {
+      clear();
+      closeCart();
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -90,18 +105,24 @@ export default function CartDrawer() {
                 </span>
               </div>
               <p className="text-[11px] text-cream/50 leading-relaxed">
-                Free UK delivery over £15. Taxes calculated at checkout. Frontend showcase — no real
-                payment is processed.
+                Pre-order now — pouches ship in the second week of October. No payment taken today.
               </p>
               <button
                 disabled={detailed.length === 0}
+                onClick={startPreorder}
                 className="btn-gold w-full justify-center disabled:opacity-40 disabled:cursor-not-allowed"
                 data-testid="cart-checkout-btn"
               >
-                Checkout <ArrowRight size={16} />
+                Reserve my pre-order <ArrowRight size={16} />
               </button>
             </footer>
           </motion.aside>
+          <PreOrderForm
+            open={preorderOpen}
+            onClose={closePreorder}
+            cartItems={detailed.map((it) => ({ id: it.id, qty: it.qty }))}
+            subtotal={subtotal}
+          />
         </>
       )}
     </AnimatePresence>

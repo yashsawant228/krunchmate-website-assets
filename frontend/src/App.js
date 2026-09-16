@@ -6,6 +6,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CartDrawer from "./components/CartDrawer";
 import StickyMobileBar from "./components/StickyMobileBar";
+import ComingSoonBanner from "./components/ComingSoonBanner";
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import About from "./pages/About";
@@ -27,6 +28,7 @@ export default function App() {
     <FlavourProvider>
       <CartProvider>
         <ScrollToTop />
+        <ComingSoonBanner />
         <Header />
         <main data-testid="main-content">
           <Routes>

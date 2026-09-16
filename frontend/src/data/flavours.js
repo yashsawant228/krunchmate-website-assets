@@ -85,7 +85,7 @@ export const FLAVOURS = {
 export const PACK_TIERS = [
   { qty: 1, label: "Single pouch", subtitle: "1 × 30g", price: 2.50 },
   { qty: 3, label: "3-pack", subtitle: "3 × 30g · £2.00 per pouch", price: 6.00 },
-  { qty: 6, label: "Box of 6", subtitle: "6 × 30g · £1.67 per pouch", price: 10.00 },
+  { qty: 6, label: "Box of 6 · mix & match", subtitle: "6 × 30g · £1.67 per pouch — any mix of flavours, one flat price", price: 10.00 },
 ];
 
 export const perUnit = (tier) => tier.price / tier.qty;

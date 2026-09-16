@@ -80,14 +80,21 @@ export default function StoryBehindYourKrunch() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, ease: [0.19, 1, 0.22, 1] }}
-              className="relative rounded-3xl overflow-hidden bg-cream p-4"
+              className="relative"
               data-testid="story-hero-illustration"
             >
               <img
-                src="/images/story/rajesh.jpg"
+                src="/images/story/rajesh.png"
                 alt="Line-art illustration of Rajesh, a Bihari makhana farmer, walking with a bamboo shoulder pole carrying a woven harvesting basket and a clay water pot."
-                className="w-full h-auto"
+                className="w-full h-auto max-w-md mx-auto"
                 loading="eager"
+                style={{
+                  // PNG has a transparent background with dark line-art.
+                  // Invert to cream tones so it reads directly on the teal
+                  // page background — no white card needed.
+                  filter:
+                    "invert(93%) sepia(15%) saturate(475%) hue-rotate(6deg) brightness(102%)",
+                }}
               />
             </motion.div>
           </div>

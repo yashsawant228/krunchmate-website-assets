@@ -5,15 +5,25 @@ export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", subject: "General", message: "" });
   const [status, setStatus] = useState(null);
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     if (!form.email.includes("@") || form.message.trim().length < 5) {
       setStatus("error");
       return;
     }
-    // Frontend-only build — pretend to send
-    setStatus("ok");
-    setForm({ name: "", email: "", subject: "General", message: "" });
+    setStatus("submitting");
+    try {
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      setStatus("ok");
+      setForm({ name: "", email: "", subject: "General", message: "" });
+    } catch {
+      setStatus("error");
+    }
   };
 
   const on = (k) => (e) => setForm({ ...form, [k]: e.target.value });
@@ -121,10 +131,15 @@ export default function Contact() {
               </label>
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <p className="text-cream/45 text-xs max-w-sm">
-                  Frontend showcase — messages are not persisted in this build.
+                  We read every message and reply within one working day.
                 </p>
-                <button type="submit" className="btn-gold" data-testid="contact-submit">
-                  Send message <Send size={14} />
+                <button
+                  type="submit"
+                  className="btn-gold"
+                  disabled={status === "submitting"}
+                  data-testid="contact-submit"
+                >
+                  {status === "submitting" ? "Sending…" : "Send message"} <Send size={14} />
                 </button>
               </div>
               {status === "ok" && (

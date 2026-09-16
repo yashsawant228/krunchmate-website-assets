@@ -26,7 +26,7 @@ function Pouch({ modelUrl, autoRotate, rotationTarget, prefersReducedMotion, mir
     box.getCenter(center);
     clone.position.sub(center); // centre on origin
     const maxDim = Math.max(size.x, size.y, size.z);
-    const target = 2.4; // world units — chosen against camera fov
+    const target = 2.0; // world units — tightened so the pouch stays contained
     const scale = target / maxDim;
     clone.scale.setScalar(scale);
     // Tune material response so the pouch reads under our brand-only lighting.
@@ -52,10 +52,10 @@ function Pouch({ modelUrl, autoRotate, rotationTarget, prefersReducedMotion, mir
   useFrame((state, delta) => {
     if (!groupRef.current) return;
     const g = groupRef.current;
-    // Idle sway (±14° around the forward axis) — never lets the pouch go
-    // edge-on / backwards, which would make the printed label read mirrored.
+    // Idle sway (±8° around the forward axis, tightened for containment) —
+    // keeps the pouch fully inside its viewer frame at every angle it reaches.
     if (autoRotate && !prefersReducedMotion && !rotationTarget.current.dragging) {
-      const target = Math.sin(state.clock.elapsedTime * 0.6) * (14 * Math.PI / 180);
+      const target = Math.sin(state.clock.elapsedTime * 0.6) * (8 * Math.PI / 180);
       rotationTarget.current.y = target;
     }
     g.rotation.y += (rotationTarget.current.y - g.rotation.y) * Math.min(1, delta * 6);
@@ -122,7 +122,7 @@ export default function PouchScene({ flavour, autoRotate }) {
   return (
     <div className="absolute inset-0" onPointerDown={onPointerDown}>
       <Canvas
-        camera={{ position: [0, 0, 3.6], fov: 42 }}
+        camera={{ position: [0, 0, 4.8], fov: 38 }}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         dpr={[1, 2]}
       >
