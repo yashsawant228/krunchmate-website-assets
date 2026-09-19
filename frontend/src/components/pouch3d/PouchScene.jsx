@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF, Environment, ContactShadows } from "@react-three/drei";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as THREE from "three";
 
@@ -11,6 +12,11 @@ useGLTF.preload("/models/pouch-peanut-butter.glb");
 /**
  * Pouch — loads the flavour-specific GLB and exposes rotation via refs.
  * Auto-rotate respects prefers-reduced-motion.
+ *
+ * IMPORTANT: this component receives `modelUrl` from the parent's committed
+ * flavour state — the same state that drives the light colours. So a mesh
+ * swap and a light-colour swap always commit in the SAME React render pass,
+ * eliminating the previous two-tone lighting race.
  */
 function Pouch({ modelUrl, autoRotate, rotationTarget, prefersReducedMotion, mirrorTexture }) {
   const groupRef = useRef();
@@ -69,11 +75,50 @@ function Pouch({ modelUrl, autoRotate, rotationTarget, prefersReducedMotion, mir
  * PouchScene — the R3F canvas + brand-only lighting rig.
  * Palette hex values passed in as accent lights only — no arbitrary colour is
  * introduced.
+ *
+ * Flavour-switch synchronisation:
+ *   The target `flavour` prop can change at any moment. If we let the light
+ *   colours track that prop directly while the mesh swap has its own async
+ *   loading lifecycle, one can update ahead of the other and the pouch
+ *   renders for a few frames as a hard two-tone split (outgoing palette on
+ *   one half, incoming on the other).
+ *
+ *   Fix: we hold a `committedFlavour` state that both the mesh source and
+ *   the light colours read from. When the parent's `flavour` prop changes,
+ *   we PRELOAD the new GLB via GLTFLoader.loadAsync FIRST, and only after
+ *   that resolves do we advance `committedFlavour`. Because both the
+ *   <primitive> object and the <directionalLight> color props read from the
+ *   same state slot, React commits them in the SAME render pass — mesh and
+ *   lighting always match whichever pouch is visible.
  */
 export default function PouchScene({ flavour, autoRotate }) {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const rotationTarget = useRef({ x: 0, y: 0, dragging: false });
   const [, force] = useState(0);
+
+  // Single source of truth for what is CURRENTLY visible + lit. Never lags
+  // the mesh, never leads the mesh — always in lockstep.
+  const [committedFlavour, setCommittedFlavour] = useState(flavour);
+
+  // When the target flavour changes, wait until the new GLB is confirmed
+  // loaded before advancing the committed state. This is the gate the bug
+  // report asked for.
+  useEffect(() => {
+    if (committedFlavour.id === flavour.id) return;
+    let cancelled = false;
+    const loader = new GLTFLoader();
+    loader.loadAsync(flavour.model).then(() => {
+      if (cancelled) return;
+      // Prime drei's cache so the sync useGLTF() call inside <Pouch> resolves
+      // immediately when we swap the modelUrl.
+      useGLTF.preload(flavour.model);
+      // Single state update → mesh source + light colours change in one
+      // React commit → the reconciler applies both to three.js before the
+      // next paint. No two-tone frame is possible.
+      setCommittedFlavour(flavour);
+    });
+    return () => { cancelled = true; };
+  }, [flavour, committedFlavour]);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -115,12 +160,13 @@ export default function PouchScene({ flavour, autoRotate }) {
     force((v) => v + 1);
   };
 
-  // Only brand-palette colours are permitted for lighting.
-  const accent = flavour.colors[3]; // teal-400 or brown-300
-  const rim = flavour.colors[1];
+  // Every visual property is derived from `committedFlavour` — never from
+  // the raw target `flavour` prop. That's the whole point of the fix.
+  const accent = committedFlavour.colors[3];
+  const rim = committedFlavour.colors[1];
 
   return (
-    <div className="absolute inset-0" onPointerDown={onPointerDown}>
+    <div className="absolute inset-0" onPointerDown={onPointerDown} data-testid={`pouch-scene-${committedFlavour.id}`}>
       <Canvas
         camera={{ position: [0, 0, 4.8], fov: 38 }}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
@@ -128,7 +174,7 @@ export default function PouchScene({ flavour, autoRotate }) {
       >
         {/* Neutral fill so the printed labels stay legible. */}
         <ambientLight intensity={0.55} color="#FFFBE5" />
-        {/* Gold key light — from the guideline. */}
+        {/* Gold key light — from the guideline (flavour-independent). */}
         <directionalLight position={[3, 4, 5]} intensity={1.4} color="#F6A81E" />
         {/* Palette-accent rim to tint edges in the active flavour. */}
         <directionalLight position={[-4, 2, -3]} intensity={0.9} color={accent} />
@@ -137,11 +183,11 @@ export default function PouchScene({ flavour, autoRotate }) {
         <Environment preset="studio" />
 
         <Pouch
-          modelUrl={flavour.model}
+          modelUrl={committedFlavour.model}
           autoRotate={autoRotate}
           rotationTarget={rotationTarget}
           prefersReducedMotion={prefersReducedMotion}
-          mirrorTexture={!!flavour.mirrorTexture}
+          mirrorTexture={!!committedFlavour.mirrorTexture}
         />
 
         <ContactShadows position={[0, -1.15, 0]} opacity={0.5} scale={4} blur={2.4} far={2} />
