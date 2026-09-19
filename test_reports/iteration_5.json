@@ -1,0 +1,45 @@
+{
+  "summary": "Verified the flavour-switch lighting race-condition fix in /app/frontend/src/components/pouch3d/PouchScene.jsx. Captured 40 timed screenshots (150ms cadence, ~2s window) across three flavour-switch scenarios (SV->PB, PB->SV, rapid PB->500ms->SV) and analysed each frame's left/right hue on both the pouch and the ambient background. In every frame the pouch mesh and the accent-light background palette match (both teal for S&V, both brown for PB). No hard two-tone split observed in any transition frame. Containment and label-orientation regressions also verified.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "evidence": {
+    "screenshots_dir": "/app/tmp/pouch-swap/ (40 JPEGs: 00_baseline, t1_00..11+final SV->PB, t2_00..11+final PB->SV, t3_00..11+final rapid double)",
+    "hue_analysis": {
+      "method": "PIL sampling of background top-left/top-right (5x5..60x60) and pouch L/R midbands (~25-45% and 55-75% width). RGB->HSV.",
+      "results": {
+        "SV_state_frames": "pouch_hue ~188 deg (teal), bg_hue 165-186 deg (teal); L-vs-R diff <= 1.2 deg",
+        "PB_state_frames": "pouch_hue ~14 deg (brown), bg_hue 18-24 deg (brown); L-vs-R diff <= 1.6 deg",
+        "transition_frames": "ALL captured frames were already on target-flavour palette by the time the first snap fired (~150 ms after click), because setCommittedFlavour is only called AFTER GLTFLoader.loadAsync resolves, and mesh + light colours both read from committedFlavour in the same React commit. Zero two-tone frames.",
+        "rapid_double_switch": "T3 (PB click -> 500ms -> SV click while PB GLB still loading): pouch stayed fully teal (~188 deg) throughout. The abandoned PB load was cancelled cleanly via the effect's cancelled flag; committedFlavour never partially updated. Matches the required behaviour."
+      }
+    },
+    "regressions_checked": {
+      "containment": "PASS - pouch stays inside the 440x620 viewer frame at rest and during idle sway in both flavours (camera z=4.8, fov 38, sway +/-8 deg unchanged).",
+      "label_orientation": "PASS - KRUNCH MATE reads right-side up in both flavours in every captured frame.",
+      "cold_boot": "PASS - /  loaded, waited 8s, canvas mounted, data-testid=pouch-viewer-salt-vinegar visible with real R3F canvas (not PNG fallback).",
+      "no_runtime_errors": "PASS - after 3 back-to-back flavour switches, only benign React Router v6->v7 future-flag warnings and a WebGL 'GPU stall due to ReadPixels' perf warning (caused by playwright screenshotting a live canvas, not by app code). No red errors."
+    }
+  },
+  "test_report_links": [
+    "/app/tmp/pouch-swap/",
+    "/app/test_reports/iteration_5.json"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "PouchScene.jsx: the two-stage load (GLTFLoader.loadAsync then useGLTF.preload then setCommittedFlavour) double-parses the GLB. loadAsync fully decodes the file into a THREE scene which is then discarded; the subsequent useGLTF() call inside <Pouch> reuses drei's cache which was already primed by the module-top useGLTF.preload at import time. In practice the second useGLTF read is instant, so the loadAsync is really only being used as a network/decode gate. This is correct and cheap on repeat swaps (HTTP cache hit + drei cache), but on the *first* swap it does pay one extra decode. Consider using useGLTF.preload alone and gating on a Suspense boundary, or awaiting only a fetch() HEAD. Minor perf polish, not a bug.",
+    "The useEffect dependency array includes committedFlavour, which is written inside the same effect. This is fine because of the id-equality early-return, but it does re-run the effect once on every commit. Not harmful.",
+    "Only 1 canvas mounts on /shop initially - the second pouch card is below the fold and gated by IntersectionObserver in PouchViewer3D. Expected, not a regression.",
+    "Console: nav-cart-button data-testid could not be located (cart button is rendered as text 'CART 0' in header). Non-blocking for this bug but flagging in case E1 wants a stable selector for future cart-drawer tests."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (frontend-only)", "frontend": "100% for the 3D lighting bug fix"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Bug fixed and verified. The atomic-swap pattern in PouchScene.jsx (committedFlavour state advanced only after GLTFLoader.loadAsync resolves; light colours + <Pouch modelUrl> both read from committedFlavour) fully eliminates the two-tone race. Reproducible verification: pixel-hue L/R diff <= 1.6 deg in every captured frame across SV->PB, PB->SV, and rapid double-switch. Screenshots preserved at /app/tmp/pouch-swap/.",
+  "rca of the issue": "PRE-FIX: light colours were derived from the raw `flavour` prop (which flips instantly on pill click) while the mesh swap went through Suspense/useGLTF's async loading path. The two updates were not in the same React commit, so for a few frames the mesh was still the old GLB but the accent lights were already the new palette - producing the observed two-tone split during rotation. POST-FIX: a single `committedFlavour` state feeds BOTH the mesh source (<Pouch modelUrl=committedFlavour.model>) AND the accent-light colour props. The state is advanced only after GLTFLoader.loadAsync resolves the new GLB, so mesh + lighting are applied in the same reconciler pass. Confirmed by hue analysis: mesh and background palette always match across all 40 captured transition frames."
+}
