@@ -5,9 +5,9 @@ import React, { Suspense, lazy, useEffect, useRef, useState } from "react";
 const PouchScene = lazy(() => import("./pouch3d/PouchScene"));
 
 const SIZES = {
-  sm: { w: 200, h: 280 },
-  md: { w: 320, h: 440 },
-  lg: { w: 440, h: 620 },
+  sm: { w: "clamp(160px, 55vw, 200px)", h: "clamp(220px, 70vh, 280px)" },
+  md: { w: "clamp(240px, 70vw, 320px)", h: "clamp(320px, 55vh, 440px)" },
+  lg: { w: "clamp(260px, 38vw, 440px)", h: "clamp(360px, 52dvh, 620px)" },
 };
 
 const hasWebGL = (() => {

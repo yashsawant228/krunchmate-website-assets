@@ -54,7 +54,7 @@ export default function Footer() {
           <div className="col-span-2">
             <img src="/images/logo-white.svg" alt="KrunchMate" className="w-36 mb-6" />
             <p className="text-cream/60 max-w-xs leading-relaxed text-sm">
-              Small-batch popped water-lily seed snacks. Sourced from Bihar, blended in the UK.
+              Small-batch popped water-lily seed snacks.Sourced & made in India, ideated & perfected in the UK.
               Cinematically krunchy.
             </p>
             <div className="flex items-center gap-4 mt-6 text-cream/70">
@@ -79,7 +79,7 @@ export default function Footer() {
         </div>
 
         <div className="pt-6 border-t border-cream/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-cream/45 text-xs">
-          <div>© {new Date().getFullYear()} KrunchMate Ltd. Made in the UK.</div>
+          <div>© {new Date().getFullYear()} KrunchMate Ltd. Made in the India For the world.</div>
           <div className="font-rusty text-[color:var(--gold)] text-lg">Snack Smarter, Krunch Now!</div>
           <div>Registered in England & Wales.</div>
         </div>

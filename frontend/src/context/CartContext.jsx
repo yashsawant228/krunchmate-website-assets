@@ -11,57 +11,63 @@ export function CartProvider({ children }) {
   const closeCart = useCallback(() => setOpen(false), []);
   const toggleCart = useCallback(() => setOpen((o) => !o), []);
 
-  const addItem = useCallback((id, qty = 1, unitPrice) => {
+  const addItem = useCallback((id, qty = 1) => {
     setItems((prev) => {
-      const existing = prev.find(
-        (p) => p.id === id && (p.unitPrice ?? null) === (unitPrice ?? null)
-      );
+      const existing = prev.find((p) => p.id === id);
       if (existing) {
         return prev.map((p) =>
-          p === existing ? { ...p, qty: p.qty + qty } : p
+          p.id === id ? { ...p, qty: p.qty + qty } : p
         );
       }
-      return [...prev, { id, qty, unitPrice }];
+      return [...prev, { id, qty }];
     });
     setOpen(true);
   }, []);
 
-  const removeItem = useCallback((id, unitPrice) => {
-    setItems((prev) =>
-      prev.filter((p) => !(p.id === id && (p.unitPrice ?? null) === (unitPrice ?? null)))
-    );
+  const removeItem = useCallback((id) => {
+    setItems((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
-  const updateQty = useCallback((id, qty, unitPrice) => {
+  const updateQty = useCallback((id, qty) => {
     setItems((prev) =>
       prev
-        .map((p) =>
-          p.id === id && (p.unitPrice ?? null) === (unitPrice ?? null)
-            ? { ...p, qty: Math.max(0, qty) }
-            : p
-        )
+        .map((p) => (p.id === id ? { ...p, qty: Math.max(0, qty) } : p))
         .filter((p) => p.qty > 0)
     );
   }, []);
 
   const clear = useCallback(() => setItems([]), []);
 
+  // Total count of all pouches in the cart across all flavours
+  const totalCount = useMemo(() => items.reduce((s, i) => s + i.qty, 0), [items]);
+
+  // Dynamic Mix & Match Tier Pricing calculation:
+  // - 6+ total pouches: £10.00 / 6 (£1.67 per pouch)
+  // - 3-5 total pouches: £6.00 / 3 (£2.00 per pouch)
+  // - 1-2 total pouches: £2.50 per pouch
   const detailed = useMemo(
     () =>
       items.map((it) => {
         const flavour = FLAVOURS[it.id];
-        const unit = it.unitPrice ?? flavour?.price ?? 0;
+        let unit = flavour?.price ?? 2.50;
+
+        if (totalCount >= 6) {
+          unit = 10.0 / 6; // £1.67 per pouch (£10.00 for 6)
+        } else if (totalCount >= 3) {
+          unit = 2.0; // £2.00 per pouch (£6.00 for 3)
+        }
+
         return {
           ...it,
           flavour,
           unit,
+          unitPrice: unit,
           lineTotal: unit * it.qty,
         };
       }),
-    [items]
+    [items, totalCount]
   );
 
-  const totalCount = useMemo(() => items.reduce((s, i) => s + i.qty, 0), [items]);
   const subtotal = useMemo(
     () => detailed.reduce((s, i) => s + i.lineTotal, 0),
     [detailed]

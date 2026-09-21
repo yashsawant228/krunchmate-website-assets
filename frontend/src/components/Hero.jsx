@@ -109,6 +109,12 @@ export default function Hero() {
 
         {/* Right pouch */}
         <div className="flex-1 relative flex items-center justify-center min-h-[500px] w-full lg:w-auto">
+          {/* Shifted callout position up (-top-6) so it sits cleanly above the pouch */}
+          <div className="absolute -top-6 right-2 hidden lg:block text-right pointer-events-none z-20">
+            <div className="product-no">{active.number}</div>
+            <div className="font-beth text-3xl text-[color:var(--gold)]">{active.accent.split("·")[0]}</div>
+          </div>
+
           <motion.div
             key={active.id + "-pouch"}
             initial={{ opacity: 0, scale: 0.9, y: 30 }}
@@ -125,11 +131,6 @@ export default function Hero() {
             />
             <PouchViewer3D flavour={active} size="lg" />
           </motion.div>
-
-          <div className="absolute top-4 right-4 hidden lg:block text-right">
-            <div className="product-no">{active.number}</div>
-            <div className="font-beth text-3xl text-[color:var(--gold)]">{active.accent.split("·")[0]}</div>
-          </div>
         </div>
       </div>
 

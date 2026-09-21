@@ -1,7 +1,20 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Production Build Outputs
+dist/
+build/
+frontend/dist/
+frontend/build/
+
+# Operating System & Environment Files
+.DS_Store
+*.DS_Store
 .env
-.env.*
-*.env
-credentials.json
-*.pem
-*.key
-.credentials
+.env.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
